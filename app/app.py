@@ -143,18 +143,26 @@ def hRoot():
 
 @app.route("/refresh", methods = ["POST"])
 def hRefresh():
-	global playlistmeta
+	global playlistmeta, ytmplaylists
 
 	elems = request.form["playlist"].split("/")
 	if len(elems) != 2:
 		raise Exception("BUG")
 		return redirect("/")
 
-	if playlistmeta["id"] != elems[1]:
-		playlistmeta["name"] = elems[0]
-		playlistmeta["id"] = elems[1]
-		playlistmeta["tracks"] = []
-		metaRefreshTracks()
+	ii = 0
+	for ii in range(len(ytmplaylists)):
+		if ytmplaylists[ii]["playlistId"] == elems[1]:
+			break
+	if ii >= len(ytmplaylists):
+		# Somebody tried an injection attack?
+		print("ERROR: posted unknown id: ", elems[1])
+	else:
+		if playlistmeta["id"] != elems[1]:
+			playlistmeta["name"] = elems[0]
+			playlistmeta["id"] = elems[1]
+			playlistmeta["tracks"] = []
+			metaRefreshTracks()
 
 	return redirect("/")
 
